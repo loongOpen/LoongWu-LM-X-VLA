@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "longwu-lm-x"
+version = "0.2.0"
+description = "龙悟LM-X model loading and action-inference runtime."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = [
+    "albumentations==1.4.18",
+    "diffusers==0.35.1",
+    "dm-tree>=0.1.8",
+    "huggingface-hub>=0.34,<2",
+    "numpy==1.26.4",
+    "opencv-python-headless>=4.5,<4.13",
+    "pillow>=10,<13",
+    "safetensors>=0.4,<1",
+    "scipy==1.15.3",
+    "torch==2.9.0",
+    "torchvision==0.24.0",
+    "transformers==4.57.3",
+]
+
+[project.optional-dependencies]
+server = [
+    "msgpack==1.1.0",
+    "pyzmq==27.0.1",
+]
+dev = [
+    "build>=1.2",
+    "msgpack==1.1.0",
+    "pip-licenses>=5",
+    "pre-commit>=4",
+    "pytest>=8",
+    "pytest-cov>=6",
+    "pytest-timeout>=2.3",
+    "pyzmq==27.0.1",
+    "ruff>=0.11",
+]
+
+[project.scripts]
+lm-x-serve = "lm_x.cli:main"
+lm-x-smoke = "lm_x.smoke:main"
+
+[project.urls]
+Repository = "https://github.com/loongOpen/LoongWu"
+Documentation = "https://github.com/loongOpen/LoongWu#readme"
+Mirror = "https://atomgit.com/openloong/LoongWu"
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu128", marker = "sys_platform == 'linux'" },
+]
+torchvision = [
+    { index = "pytorch-cu128", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["lm_x*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+pythonpath = ["src"]
+markers = [
+    "gpu: requires a CUDA-capable GPU",
+    "real_checkpoint: requires locally available checkpoint and backbone files",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]

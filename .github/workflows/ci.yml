@@ -1,0 +1,38 @@
+name: Inference runtime
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NO_ALBUMENTATIONS_UPDATE: "1"
+      HF_HUB_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install CPU test environment
+        run: |
+          python -m pip install torch==2.9.0 torchvision==0.24.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e '.[dev,server]'
+      - name: Lint and format
+        run: |
+          ruff check src tests scripts
+          ruff format --check src tests scripts
+      - name: Build and test the runtime
+        run: |
+          python -m build
+          pytest -q -m 'not real_checkpoint' --timeout=60
+      - name: Check installed command entry points
+        run: |
+          lm-x-serve --help
+          lm-x-smoke --help
