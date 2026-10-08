@@ -4,11 +4,11 @@
 
 [English](README.md) | **简体中文**
 
-[论文 v3](https://arxiv.org/abs/2608.25757v3) · [GitHub](https://github.com/loongOpen/LoongWu-LM-X-VLA) · [AtomGit](https://atomgit.com/openloong/LoongWu)
+[论文 v3](https://arxiv.org/abs/2608.25757v3) · [GitHub](https://github.com/loongOpen/LoongWu-LM-X-VLA) · [AtomGit](https://atomgit.com/openloong/LoongWu-LM-X-VLA) · [模型（HF）](https://huggingface.co/OpenLoong/LoongWu-LM-X-VLA-v1) · [模型（AtomGit）](https://ai.atomgit.com/openloong/LoongWu-LM-X-VLA-v1)
 
 LM-X 是一个面向机器人操作的视觉—语言—动作（VLA）模型。它接收多视角图像、语言指令和机器人状态，生成连续动作片段。论文同时研究三个预测信号：任务进展（RTG）、下一语义事件（ETG）和动作不确定性。
 
-本仓库提供推理代码，不包含训练代码或训练数据。**模型下载地址将在模型仓库确定后补充。**
+本仓库提供推理代码，不包含训练代码或训练数据。模型下载地址与使用方法见下文。
 
 ## 模型概览
 
@@ -50,8 +50,8 @@ LM-X 是一个面向机器人操作的视觉—语言—动作（VLA）模型。
 | 内容 | 状态 |
 | --- | --- |
 | 推理代码 | 模型加载、图像与状态预处理、动作生成、Python API 和 ZeroMQ 服务 |
-| LM-X checkpoint | 下载地址待补充；通过 `--model-path` 指定 |
-| Cosmos-Reason2-2B | 单独准备权重、tokenizer 和 processor；通过 `--backbone-path` 指定 |
+| LM-X v1 checkpoint | [Hugging Face](https://huggingface.co/OpenLoong/LoongWu-LM-X-VLA-v1) / [AtomGit](https://ai.atomgit.com/openloong/LoongWu-LM-X-VLA-v1)；通过 `--model-path` 指定 |
+| Cosmos-Reason2-2B | [NVIDIA 官方下载](https://huggingface.co/nvidia/Cosmos-Reason2-2B)；单独准备权重、tokenizer 和 processor，通过 `--backbone-path` 指定 |
 | 训练代码与训练数据 | 不在本次发布范围内 |
 
 ## 快速开始
@@ -72,14 +72,28 @@ Linux 默认依赖为 PyTorch 2.9.0 / CUDA 12.8。其他环境的配置见[推�
 
 运行模型推理需要 **LM-X checkpoint** 和 **`nvidia/Cosmos-Reason2-2B`**。checkpoint 中的配置、权重和归一化统计需要配套；Cosmos 目录还需包含 tokenizer 与 processor 文件。文件布局和分片支持见[资源说明](docs/inference.md#checkpoint-资源契约)。
 
+LM-X 从上方 Hugging Face 或 AtomGit 任选一处下载即可。Cosmos 使用 [GR00T 官方安装说明](https://github.com/NVIDIA/Isaac-GR00T#installation)中提供的 [NVIDIA 模型地址](https://huggingface.co/nvidia/Cosmos-Reason2-2B)。先在 Cosmos 模型页面获取访问权限，再使用同一 Hugging Face 账号登录。
+
+安装完成后，在仓库根目录执行：
+
+```bash
+uv run --frozen hf auth login
+uv run --frozen hf download OpenLoong/LoongWu-LM-X-VLA-v1 \
+  --local-dir ./checkpoints/LoongWu-LM-X-VLA-v1
+uv run --frozen hf download nvidia/Cosmos-Reason2-2B \
+  --local-dir ./checkpoints/Cosmos-Reason2-2B
+```
+
+若从 AtomGit 下载 LM-X，将完整模型目录保存到 `./checkpoints/LoongWu-LM-X-VLA-v1`，即可跳过第一条下载命令。
+
 ### 运行一次推理
 
-模型资源齐备后，将下方路径和本体标签替换为实际值：
+下方示例使用上述下载目录。将 `CHECKPOINT_EMBODIMENT_TAG` 替换为 checkpoint 支持的本体标签；如果模型保存在其他位置，请相应修改路径。
 
 ```bash
 uv run --frozen lm-x-smoke \
-  --model-path /absolute/path/to/checkpoint \
-  --backbone-path /absolute/path/to/backbone \
+  --model-path ./checkpoints/LoongWu-LM-X-VLA-v1 \
+  --backbone-path ./checkpoints/Cosmos-Reason2-2B \
   --embodiment-tag CHECKPOINT_EMBODIMENT_TAG \
   --device cuda:0 \
   --dtype bfloat16 \
@@ -95,8 +109,8 @@ uv run --frozen lm-x-smoke \
 from lm_x import LMXPolicy, make_sample_observation
 
 policy = LMXPolicy(
-    model_path="/absolute/path/to/checkpoint",
-    backbone_path="/absolute/path/to/backbone",
+    model_path="./checkpoints/LoongWu-LM-X-VLA-v1",
+    backbone_path="./checkpoints/Cosmos-Reason2-2B",
     embodiment_tag="CHECKPOINT_EMBODIMENT_TAG",
     device="cuda:0",
     local_files_only=True,
