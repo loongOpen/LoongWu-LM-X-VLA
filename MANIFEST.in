@@ -1,6 +1,7 @@
-include README.md LICENSE pyproject.toml uv.lock
+include README.md README_ZH.md LICENSE pyproject.toml uv.lock
 include .pre-commit-config.yaml
 recursive-include docs *.md
+recursive-include docs/assets/paper-v3 *.png
 recursive-include scripts *.py
 recursive-include tests *.py
 global-exclude __pycache__ *.py[cod]

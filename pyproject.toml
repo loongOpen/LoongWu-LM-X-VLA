@@ -47,8 +47,8 @@ lm-x-serve = "lm_x.cli:main"
 lm-x-smoke = "lm_x.smoke:main"
 
 [project.urls]
-Repository = "https://github.com/loongOpen/LoongWu"
-Documentation = "https://github.com/loongOpen/LoongWu#readme"
+Repository = "https://github.com/loongOpen/LoongWu-LM-X-VLA"
+Documentation = "https://github.com/loongOpen/LoongWu-LM-X-VLA#readme"
 Mirror = "https://atomgit.com/openloong/LoongWu"
 
 [tool.uv.sources]
